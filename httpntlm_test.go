@@ -10,10 +10,6 @@ import (
 	"github.com/ThomsonReutersEikon/go-ntlm/ntlm"
 )
 
-const (
-	buildsAPIURL = "https://tfs.videa.tv/tfs/Videa/Videa/_apis/build/builds"
-)
-
 func Test_AuthenticationSuccess(t *testing.T) {
 	client := http.Client{
 		Transport: &NtlmTransport{
