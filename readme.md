@@ -6,7 +6,7 @@ It is based on [https://github.com/ThomsonReutersEikon/go-ntlm](https://github.c
 
 ## Usage example
 
-```
+```go
 package main
 
 import (
