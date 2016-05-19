@@ -22,7 +22,7 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 	// first send NTLM Negotiate header
 	r, _ := http.NewRequest("GET", req.URL.String(), strings.NewReader(""))
 	r.Header.Add("Authorization", "NTLM "+encBase64(negotiate()))
-	client := http.Client{}
+	client := http.Client{Transport: &http.Transport{}}
 	resp, err := client.Do(r)
 	if err != nil {
 		return nil, err
