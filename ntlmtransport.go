@@ -1,20 +1,24 @@
 package httpntlm
 
 import (
+	"crypto/tls"
 	"errors"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/ThomsonReutersEikon/go-ntlm/ntlm"
 )
 
 // NtlmTransport is implementation of http.RoundTripper interface
 type NtlmTransport struct {
-	Domain   string
-	User     string
-	Password string
+	TLSClientConfig *tls.Config
+	Domain          string
+	User            string
+	Password        string
 }
 
 // RoundTrip method send http request and tries to perform NTLM authentication
@@ -22,7 +26,21 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 	// first send NTLM Negotiate header
 	r, _ := http.NewRequest("GET", req.URL.String(), strings.NewReader(""))
 	r.Header.Add("Authorization", "NTLM "+encBase64(negotiate()))
-	client := http.Client{Transport: &http.Transport{}}
+
+	client := http.Client{Transport: &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig:       t.TLSClientConfig,
+	}}
+
 	resp, err := client.Do(r)
 	if err != nil {
 		return nil, err
