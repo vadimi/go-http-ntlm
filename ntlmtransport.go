@@ -96,7 +96,7 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 
 		// set NTLM Authorization header
 		req.Header.Set("Authorization", "NTLM "+encBase64(authenticate.Bytes()))
-		resp, err = client.Do(req)
+		return client.Do(req)
 	}
 
 	return resp, err
