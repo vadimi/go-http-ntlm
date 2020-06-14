@@ -1,3 +1,5 @@
 module github.com/vadimi/go-http-ntlm
 
-require github.com/ThomsonReutersEikon/go-ntlm v0.0.0-20180604201143-51f51a355c40
+go 1.14
+
+require github.com/vadimi/go-ntlm v1.0.0

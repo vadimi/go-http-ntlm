@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ThomsonReutersEikon/go-ntlm/ntlm"
+	"github.com/vadimi/go-ntlm/ntlm"
 )
 
 // NtlmTransport is implementation of http.RoundTripper interface

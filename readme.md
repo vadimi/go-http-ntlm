@@ -1,9 +1,6 @@
 # go-http-ntlm
 go-http-ntlm is a Go package that contains NTLM transport (`http.RoundTripper` implementation) for `http.Client` to make NTLM auth protected http requests.
 
-It is based on [https://github.com/ThomsonReutersEikon/go-ntlm](https://github.com/ThomsonReutersEikon/go-ntlm) library.
-
-
 ## Usage example
 
 ```go
