@@ -12,7 +12,7 @@ import (
     "net/http"
     "strings"
 
-    "github.com/vadimi/go-http-ntlm"
+    "github.com/vadimi/go-http-ntlm/v2"
 )
 
 func main() {
