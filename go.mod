@@ -1,4 +1,4 @@
-module github.com/vadimi/go-http-ntlm
+module github.com/vadimi/go-http-ntlm/v2
 
 go 1.13
 
