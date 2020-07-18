@@ -23,6 +23,12 @@ func main() {
             Domain:   "mydomain",
             User:     "testuser",
             Password: "fish",
+            // Configure RoundTripper if necessary, otherwise DefaultTransport is used
+            RoundTripper: &http.Transport{
+                // provide tls config
+                TLSClientConfig: &tls.Config{},
+                // other properties RoundTripper, see http.DefaultTransport
+            },
         },
     }
 
