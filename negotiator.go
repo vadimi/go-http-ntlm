@@ -6,15 +6,19 @@ import (
 )
 
 const (
-	negotiateUnicode    = 0x0001 // Text strings are in unicode
-	negotiateOEM        = 0x0002 // Text strings are in OEM
-	requestTarget       = 0x0004 // Server return its auth realm
-	negotiateSign       = 0x0010 // Request signature capability
-	negotiateSeal       = 0x0020 // Request confidentiality
-	negotiateLMKey      = 0x0080 // Generate session key
-	negotiateNTLM       = 0x0200 // NTLM authentication
-	negotiateLocalCall  = 0x4000 // client/server on same machine
-	negotiateAlwaysSign = 0x8000 // Sign for all security levels
+	negotiateUnicode                 = 0x0001     // Text strings are in unicode
+	negotiateOEM                     = 0x0002     // Text strings are in OEM
+	requestTarget                    = 0x0004     // Server return its auth realm
+	negotiateSign                    = 0x0010     // Request signature capability
+	negotiateSeal                    = 0x0020     // Request confidentiality
+	negotiateLMKey                   = 0x0080     // Generate session key
+	negotiateNTLM                    = 0x0200     // NTLM authentication
+	negotiateLocalCall               = 0x4000     // client/server on same machine
+	negotiateAlwaysSign              = 0x8000     // Sign for all security levels
+	negotiateExtendedSessionSecurity = 0x80000    // Extended session security
+	negotiate128                     = 0x20000000 // 128-bit session key negotiation
+	negotiateKeyExch                 = 0x40000000 // Key exchange
+	negotiate56                      = 0x80000000 // 56-bit encryption
 )
 
 var (
@@ -28,7 +32,7 @@ var (
 // for details see http://www.innovation.ch/personal/ronald/ntlm.html
 func negotiate() []byte {
 	ret := make([]byte, 44)
-	flags := negotiateAlwaysSign | negotiateNTLM | requestTarget | negotiateOEM | negotiateUnicode
+	flags := negotiateAlwaysSign | negotiateExtendedSessionSecurity | negotiateKeyExch | negotiate128 | negotiate56 | negotiateNTLM | requestTarget | negotiateOEM | negotiateUnicode
 
 	copy(ret, []byte("NTLMSSP\x00")) // protocol
 	put32(ret[8:], 1)                // type
