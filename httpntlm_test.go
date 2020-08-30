@@ -41,6 +41,7 @@ func Test_AuthenticationSuccess(t *testing.T) {
 			}
 		} else {
 			challenge, _ := session.GenerateChallengeMessage()
+			w.Header().Add("WWW-Authenticate", `Basic realm="test"`)
 			w.Header().Add("WWW-Authenticate", "NTLM "+encBase64(challenge.Bytes()))
 			w.WriteHeader(401)
 		}
