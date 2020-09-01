@@ -47,12 +47,23 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 		}
 
 		// retrieve Www-Authenticate header from response
-		ntlmChallengeHeader := resp.Header.Get("WWW-Authenticate")
-		if ntlmChallengeHeader == "" {
-			return nil, errors.New("Wrong WWW-Authenticate header")
+		authHeaders := resp.Header.Values("WWW-Authenticate")
+		if len(authHeaders) == 0 {
+			return nil, errors.New("WWW-Authenticate header missing")
 		}
 
-		ntlmChallengeString := strings.Replace(ntlmChallengeHeader, "NTLM ", "", -1)
+		// there could be multiple WWW-Authenticate headers, so we need to pick the one that starts with NTLM
+		var ntlmChallengeString string
+		for _, h := range authHeaders {
+			if strings.HasPrefix(h, "NTLM") {
+				ntlmChallengeString = strings.Replace(h, "NTLM ", "", -1)
+				break
+			}
+		}
+		if ntlmChallengeString == "" {
+			return nil, errors.New("wrong WWW-Authenticate header")
+		}
+
 		challengeBytes, err := decBase64(ntlmChallengeString)
 		if err != nil {
 			return nil, err
