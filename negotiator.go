@@ -16,6 +16,7 @@ const (
 	negotiateLocalCall               = 0x4000     // client/server on same machine
 	negotiateAlwaysSign              = 0x8000     // Sign for all security levels
 	negotiateExtendedSessionSecurity = 0x80000    // Extended session security
+	negotiateVersion                 = 0x02000000 // negotiate version flag
 	negotiate128                     = 0x20000000 // 128-bit session key negotiation
 	negotiateKeyExch                 = 0x40000000 // Key exchange
 	negotiate56                      = 0x80000000 // 56-bit encryption
@@ -29,10 +30,10 @@ var (
 )
 
 // generates NTLM Negotiate type-1 message
-// for details see http://www.innovation.ch/personal/ronald/ntlm.html
+// for details see https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b34032e5-3aae-4bc6-84c3-c6d80eadf7f2
 func negotiate() []byte {
-	ret := make([]byte, 44)
-	flags := negotiateAlwaysSign | negotiateExtendedSessionSecurity | negotiateKeyExch | negotiate128 | negotiate56 | negotiateNTLM | requestTarget | negotiateOEM | negotiateUnicode
+	ret := make([]byte, 40)
+	flags := negotiateAlwaysSign | negotiateExtendedSessionSecurity | negotiateKeyExch | negotiate128 | negotiate56 | negotiateNTLM | requestTarget | negotiateOEM | negotiateUnicode | negotiateVersion
 
 	copy(ret, []byte("NTLMSSP\x00")) // protocol
 	put32(ret[8:], 1)                // type
@@ -42,13 +43,10 @@ func negotiate() []byte {
 	put32(ret[20:], 0)               // NT domain name offset
 	put16(ret[24:], 0)               // local workstation name length
 	put16(ret[26:], 0)               // local workstation name max length
-	put32(ret[28:], 0)               // local workstation name offset
-	put16(ret[32:], 0)               // unknown name length
-	put16(ret[34:], 0)               // ...
-	put16(ret[36:], 0x30)            // unknown offset
-	put16(ret[38:], 0)               // unknown name length
-	put16(ret[40:], 0)               // ...
-	put16(ret[42:], 0x30)            // unknown offset
+	put32(ret[28:], 40)              // local workstation name offset
+	put16(ret[32:], 0x0106)          // ProductMajorVersion - 6, ProductMinorVersion - 1
+	put16(ret[34:], 7601)            // ProductBuild - 7601
+	put16(ret[38:], 0x0f00)          // NTLM revision - 15
 
 	return ret
 }
