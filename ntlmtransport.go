@@ -16,6 +16,7 @@ type NtlmTransport struct {
 	User     string
 	Password string
 	http.RoundTripper
+	Jar http.CookieJar
 }
 
 // RoundTrip method send http request and tries to perform NTLM authentication
@@ -27,6 +28,10 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 	client := http.Client{}
 	if t.RoundTripper != nil {
 		client.Transport = t.RoundTripper
+	}
+
+	if t.Jar != nil {
+		client.Jar = t.Jar
 	}
 
 	resp, err := client.Do(r)
