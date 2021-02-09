@@ -20,6 +20,10 @@ const (
 	negotiate128                     = 0x20000000 // 128-bit session key negotiation
 	negotiateKeyExch                 = 0x40000000 // Key exchange
 	negotiate56                      = 0x80000000 // 56-bit encryption
+
+	negotiateFlags uint32 = negotiateAlwaysSign | negotiateExtendedSessionSecurity | negotiateKeyExch |
+		negotiate128 | negotiate56 | negotiateNTLM | requestTarget | negotiateOEM |
+		negotiateUnicode | negotiateVersion
 )
 
 var (
@@ -33,11 +37,10 @@ var (
 // for details see https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b34032e5-3aae-4bc6-84c3-c6d80eadf7f2
 func negotiate() []byte {
 	ret := make([]byte, 40)
-	flags := negotiateAlwaysSign | negotiateExtendedSessionSecurity | negotiateKeyExch | negotiate128 | negotiate56 | negotiateNTLM | requestTarget | negotiateOEM | negotiateUnicode | negotiateVersion
 
 	copy(ret, []byte("NTLMSSP\x00")) // protocol
 	put32(ret[8:], 1)                // type
-	put32(ret[12:], uint32(flags))   // flags
+	put32(ret[12:], negotiateFlags)  // flags
 	put16(ret[16:], 0)               // NT domain name length
 	put16(ret[18:], 0)               // NT domain name max length
 	put32(ret[20:], 0)               // NT domain name offset
