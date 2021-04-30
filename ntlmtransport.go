@@ -21,10 +21,6 @@ type NtlmTransport struct {
 
 // RoundTrip method send http request and tries to perform NTLM authentication
 func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err error) {
-	// first send NTLM Negotiate header
-	r, _ := http.NewRequest("GET", req.URL.String(), strings.NewReader(""))
-	r.Header.Add("Authorization", "NTLM "+encBase64(negotiate()))
-
 	client := http.Client{}
 	if t.RoundTripper != nil {
 		client.Transport = t.RoundTripper
@@ -33,6 +29,20 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 	if t.Jar != nil {
 		client.Jar = t.Jar
 	}
+
+	resp, err := t.ntlmRoundTrip(client, req)
+	// retry once in case of an empty ntlm challenge
+	if err != nil && errors.Is(err, errEmptyNtlm) {
+		return t.ntlmRoundTrip(client, req)
+	}
+
+	return resp, err
+}
+
+func (t NtlmTransport) ntlmRoundTrip(client http.Client, req *http.Request) (*http.Response, error) {
+	// first send NTLM Negotiate header
+	r, _ := http.NewRequest("GET", req.URL.String(), strings.NewReader(""))
+	r.Header.Add("Authorization", "NTLM "+encBase64(negotiate()))
 
 	resp, err := client.Do(r)
 	if err != nil {
@@ -58,14 +68,20 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 		}
 
 		// there could be multiple WWW-Authenticate headers, so we need to pick the one that starts with NTLM
+		ntlmChallengeFound := false
 		var ntlmChallengeString string
 		for _, h := range authHeaders {
 			if strings.HasPrefix(h, "NTLM") {
-				ntlmChallengeString = strings.Replace(h, "NTLM ", "", -1)
+				ntlmChallengeFound = true
+				ntlmChallengeString = strings.TrimSpace(strings.TrimPrefix(h, "NTLM"))
 				break
 			}
 		}
 		if ntlmChallengeString == "" {
+			if ntlmChallengeFound {
+				return nil, errEmptyNtlm
+			}
+
 			return nil, errors.New("wrong WWW-Authenticate header")
 		}
 
