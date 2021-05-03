@@ -10,6 +10,8 @@ import (
 	"github.com/vadimi/go-ntlm/ntlm"
 )
 
+var errEmptyNtlm = errors.New("empty NTLM challenge")
+
 // NtlmTransport is implementation of http.RoundTripper interface
 type NtlmTransport struct {
 	Domain   string
@@ -73,7 +75,7 @@ func (t NtlmTransport) ntlmRoundTrip(client http.Client, req *http.Request) (*ht
 		for _, h := range authHeaders {
 			if strings.HasPrefix(h, "NTLM") {
 				ntlmChallengeFound = true
-				ntlmChallengeString = strings.TrimSpace(strings.TrimPrefix(h, "NTLM"))
+				ntlmChallengeString = strings.TrimSpace(h[4:])
 				break
 			}
 		}
