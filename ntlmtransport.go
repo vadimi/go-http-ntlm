@@ -18,7 +18,11 @@ type NtlmTransport struct {
 	User     string
 	Password string
 	http.RoundTripper
-	Jar         http.CookieJar
+	Jar http.CookieJar
+
+	// Headers to copy from the original request onto the NTLM negotiation
+	// request, this can be useful when extra authentication is required,
+	// for example when you use Azure Relay.
 	CopyHeaders []string
 }
 
