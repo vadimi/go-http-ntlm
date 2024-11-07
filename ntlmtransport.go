@@ -18,7 +18,8 @@ type NtlmTransport struct {
 	User     string
 	Password string
 	http.RoundTripper
-	Jar http.CookieJar
+	Jar         http.CookieJar
+	CopyHeaders []string
 }
 
 // RoundTrip method send http request and tries to perform NTLM authentication
@@ -45,6 +46,13 @@ func (t NtlmTransport) ntlmRoundTrip(client http.Client, req *http.Request) (*ht
 	// first send NTLM Negotiate header
 	r, _ := http.NewRequest("GET", req.URL.String(), strings.NewReader(""))
 	r.Header.Add("Authorization", "NTLM "+encBase64(negotiate()))
+
+	for i := range t.CopyHeaders {
+		values := req.Header.Values(t.CopyHeaders[i])
+		for _, v := range values {
+			r.Header.Add(t.CopyHeaders[i], v)
+		}
+	}
 
 	resp, err := client.Do(r)
 	if err != nil {
