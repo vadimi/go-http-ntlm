@@ -19,6 +19,11 @@ type NtlmTransport struct {
 	Password string
 	http.RoundTripper
 	Jar http.CookieJar
+
+	// Headers to copy from the original request onto the NTLM negotiation
+	// request, this can be useful when extra authentication is required,
+	// for example when you use Azure Relay.
+	CopyHeaders []string
 }
 
 // RoundTrip method send http request and tries to perform NTLM authentication
@@ -45,6 +50,13 @@ func (t NtlmTransport) ntlmRoundTrip(client http.Client, req *http.Request) (*ht
 	// first send NTLM Negotiate header
 	r, _ := http.NewRequest("GET", req.URL.String(), strings.NewReader(""))
 	r.Header.Add("Authorization", "NTLM "+encBase64(negotiate()))
+
+	for i := range t.CopyHeaders {
+		values := req.Header.Values(t.CopyHeaders[i])
+		for _, v := range values {
+			r.Header.Add(t.CopyHeaders[i], v)
+		}
+	}
 
 	resp, err := client.Do(r)
 	if err != nil {
